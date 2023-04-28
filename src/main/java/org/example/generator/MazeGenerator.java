@@ -1,7 +1,9 @@
 package org.example.generator;
 
 import org.example.enums.GeneratorType;
+import org.example.enums.RandomType;
 import org.example.model.ImageProcessor;
+import org.example.objects.GeneratorRequest;
 import org.example.objects.MyPoint;
 
 import java.awt.image.BufferedImage;
@@ -16,19 +18,25 @@ public class MazeGenerator {
     final static int START = 2;
     final static int FINISH = 3;
 
+    RandomType randomType;
     int[][] maze;
     int width;
     int height;
 
-    public BufferedImage generateMaze(int rows, int columns, GeneratorType generatorType) throws IOException {
+    public BufferedImage generateMaze(GeneratorRequest generatorRequest) throws IOException {
 
         BufferedImage resultMaze;
+        this.randomType = generatorRequest.getRandomType();
+        GeneratorType generatorType = generatorRequest.getGeneratorType();
+        int rows = generatorRequest.getRows();
+        int columns = generatorRequest.getColumns();
+
         switch (generatorType) {
             case DEPTH_FIRST_SEARCH:
                 resultMaze = ImageProcessor.generateMazeImage(dfsGenerator(rows, columns));
                 break;
             case GPT:
-                resultMaze = ImageProcessor.generateMazeImage(generateMazeGpt(rows,columns));
+                resultMaze = ImageProcessor.generateMazeImage(generateMazeGpt(rows, columns));
                 break;
             default:
                 throw new RuntimeException("Smth went wrong in Switch case.");
@@ -38,37 +46,39 @@ public class MazeGenerator {
     }
 
     private int[][] dfsGenerator(int rows, int columns) {
-        height = (rows*2)+1;
-        width = (columns*2)+1;
+        height = (rows * 2) + 1;
+        width = (columns * 2) + 1;
         maze = new int[height][width];
         for (int[] ints : maze) {
             Arrays.fill(ints, WALL);
         }
 
-        depthFirstSearch(1,1);
+        depthFirstSearch(1, 1);
 
         maze[1][1] = START;
-        maze[height-2][width-2] = FINISH;
+        maze[height - 2][width - 2] = FINISH;
         return maze;
     }
 
-    private int[][] generateMazeGpt(int rows, int columns){
-        height = (rows*2);
-        width = (columns*2);
-        maze = new int [height][width];
+    private int[][] generateMazeGpt(int rows, int columns) {
+        height = (rows * 2);
+        width = (columns * 2);
+        maze = new int[height][width];
         GPT(1, 1);
         maze[1][1] = START;
-        maze[height-2][width-2] = FINISH;
+        maze[height - 2][width - 2] = FINISH;
         return maze;
     }
 
 
-    public void depthFirstSearch(int r, int c){
+    public void depthFirstSearch(int r, int c) {
         Stack<MyPoint> myPoints = new Stack<>();
-        myPoints.push(new MyPoint(c,r));
+        myPoints.push(new MyPoint(c, r));
 
-        while(!myPoints.empty()){
+        while (!myPoints.empty()) {
+
             Integer[] randomDirections = generateRandomDirections();
+
             MyPoint current = myPoints.pop();
             for (Integer randomDirection : randomDirections) {
                 switch (randomDirection) {
@@ -106,7 +116,7 @@ public class MazeGenerator {
                         if (maze[current.y][current.x - 2] != VISITED) {
                             maze[current.y][current.x - 2] = VISITED;
                             maze[current.y][current.x - 1] = VISITED;
-                            myPoints.push(new MyPoint(current.x-2, current.y));
+                            myPoints.push(new MyPoint(current.x - 2, current.y));
                         }
                         break;
                 }
@@ -137,23 +147,23 @@ public class MazeGenerator {
             neighbors = getUnvisitedNeighbors(row, col);
         }
         maze[1][1] = START;
-        maze[height-2][width-2] = FINISH;
+        maze[height - 2][width - 2] = FINISH;
     }
 
     private int[] getUnvisitedNeighbors(int row, int col) {
         // create a list of all neighboring cells that haven't been visited yet
         int[] neighbors = new int[4];
         int count = 0;
-        if (row > 0 && maze[row-1][col] == 1) { // top neighbor
+        if (row > 0 && maze[row - 1][col] == 1) { // top neighbor
             neighbors[count++] = 0;
         }
-        if (row < height-1 && maze[row+1][col] == 1) { // bottom neighbor
+        if (row < height - 1 && maze[row + 1][col] == 1) { // bottom neighbor
             neighbors[count++] = 1;
         }
-        if (col > 0 && maze[row][col-1] == 1) { // left neighbor
+        if (col > 0 && maze[row][col - 1] == 1) { // left neighbor
             neighbors[count++] = 2;
         }
-        if (col < width-1 && maze[row][col+1] == 1) { // right neighbor
+        if (col < width - 1 && maze[row][col + 1] == 1) { // right neighbor
             neighbors[count++] = 3;
         }
         int[] result = new int[count];
@@ -161,17 +171,38 @@ public class MazeGenerator {
         return result;
     }
 
-
     private Integer[] generateRandomDirections() {
+
+        switch (this.randomType) {
+            case RANDOM:
+                return generatePseudoRandomDirections();
+            case TRUE_RANDOM:
+                return generateTrueRandomDirections();
+            default:
+                throw new RuntimeException("Smth went wrong in random directions");
+        }
+    }
+
+    private Integer[] generateTrueRandomDirections() {
         ArrayList<Integer> randoms = new ArrayList<>();
+        Random rn = new Random();
+
+        for (int i = 0; i < 4; i++)
+            randoms.add(rn.nextInt(4) + 1);
+
+        return randoms.toArray(new Integer[4]);
+    }
+
+    private Integer[] generatePseudoRandomDirections() {
+        ArrayList<Integer> randoms = new ArrayList<>();
+
         for (int i = 0; i < 4; i++)
             randoms.add(i + 1);
         Collections.shuffle(randoms);
 
         return randoms.toArray(new Integer[4]);
     }
-
-
+}
        /* public void recursion(int r, int c) {
 
         Integer[] randomDirections = generateRandomDirections();
@@ -218,4 +249,4 @@ public class MazeGenerator {
             }
         }
     }*/
-}
+

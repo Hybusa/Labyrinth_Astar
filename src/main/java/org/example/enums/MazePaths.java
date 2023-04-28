@@ -8,6 +8,7 @@ public enum MazePaths {
     MAZE_ULTIMATE("C:/Users/KuZzz/Desktop/MAZE_ULTIMATE.png"),
     MAZE_SQUIRREL("C:/Users/KuZzz/Desktop/MAZES/Maze_Squirrel.png"),
     CIRCLE_MAZE("C:/Users/KuZzz/Desktop/MAZES/Circle_Maze.png"),
+    MAZE_8("C:/Users/KuZzz/Desktop/MAZES/MAZE_8.png"),
     MAZE_9("C:/Users/KuZzz/Desktop/MAZES/MAZE_9.png"),
     SAVE_PATH("X:/MAZES/Java/");
 

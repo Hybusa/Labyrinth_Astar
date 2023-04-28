@@ -38,9 +38,7 @@ public class ActualSolver {
         }
         else {
             MazeGenerator mazeGenerator = new MazeGenerator();
-            image = mazeGenerator.generateMaze(generatorRequest.getRows(),
-                    generatorRequest.getColumns(),
-                    generatorRequest.getGeneratorType());
+            image = mazeGenerator.generateMaze(generatorRequest);
         }
 
         width = image.getWidth();
