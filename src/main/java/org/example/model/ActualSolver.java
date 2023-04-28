@@ -1,6 +1,8 @@
 package org.example.model;
 
 
+import org.example.generator.MazeGenerator;
+import org.example.objects.GeneratorRequest;
 import org.example.objects.MyPoint;
 import org.example.objects.Node;
 import org.example.objects.NodeState;
@@ -16,18 +18,33 @@ import java.util.*;
 
 public class ActualSolver {
     final static int EXIT_AFFINITY = 1;
-    final static int DRAW_FREQUENCY = 5;
+    final static int DRAW_FREQUENCY = 1;
 
-    public static void SolveMaze(String imagePath, boolean drawState, boolean drawGif, String savePath) throws IOException {
+    public static void SolveMaze(String imagePath,
+                                 boolean drawState,
+                                 boolean drawGif,
+                                 String savePath,
+                                 GeneratorRequest generatorRequest) throws IOException {
 
 
         List<MyPoint> player = new ArrayList<>();
         List<MyPoint> exit = new ArrayList<>();
+        BufferedImage image;
+        int width;
+        int height;
 
+        if(generatorRequest == null) {
+            image = ImageIO.read(new File(imagePath));
+        }
+        else {
+            MazeGenerator mazeGenerator = new MazeGenerator();
+            image = mazeGenerator.generateMaze(generatorRequest.getRows(),
+                    generatorRequest.getColumns(),
+                    generatorRequest.getGeneratorType());
+        }
 
-        BufferedImage image = ImageIO.read(new File(imagePath));
-        int width = image.getWidth();
-        int height = image.getHeight();
+        width = image.getWidth();
+        height = image.getHeight();
 
         Map<Integer, Node> objects = new HashMap<>();
 
@@ -37,7 +54,7 @@ public class ActualSolver {
             for (int x = 0; x < width; x++) {
                 Color pixelColor = new Color(image.getRGB(x, y));
 
-                if (pixelColor.getBlue() < 25 && pixelColor.getRed() < 25 && pixelColor.getGreen() < 25)
+                if (pixelColor.getBlue() < 100 && pixelColor.getRed() < 100 && pixelColor.getGreen() < 100)
                     objects.put(x * width + y, new Node(x, y, NodeState.WALL_POINT, Long.MAX_VALUE));
                 else if (pixelColor.getBlue() == 255 && pixelColor.getRed() == 0 && pixelColor.getGreen() == 0)
                     player.add(new MyPoint(x, y));
@@ -56,9 +73,9 @@ public class ActualSolver {
 
         queue.add(start);
         long counter = 1;
-        while (!queue.isEmpty()) {
+        boolean done = false;
 
-            boolean done = false;
+        while (!queue.isEmpty() && !done) {
 
             Node current = queue.poll();
             List<Node> neighbours = populateNeighbours(current);
@@ -94,8 +111,7 @@ public class ActualSolver {
                 counter++;
             }
 
-            if (done)
-                break;
+
         }
         List<Node> result = new ArrayList<>();
         Node pathNode = end;
@@ -105,7 +121,7 @@ public class ActualSolver {
         }
 
         long timerStop = System.currentTimeMillis();
-        System.out.println(timerStop - timerStart);
+        System.out.println("Maze solved in: "  + (timerStop - timerStart) + "ms");
 
         if (drawGif) {
             arrayForGif.add(ImageProcessor.deepCopy(image));

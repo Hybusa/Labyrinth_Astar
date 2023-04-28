@@ -3,7 +3,6 @@ package org.example.objects;
 public class Node implements Comparable<Node> {
     private final MyPoint point;
     private Long cost;
-
     private Node cameFrom;
     private NodeState state;
 
