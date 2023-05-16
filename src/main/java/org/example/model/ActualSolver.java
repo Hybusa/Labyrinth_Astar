@@ -20,12 +20,11 @@ public class ActualSolver {
     final static int EXIT_AFFINITY = 1;
     final static int DRAW_FREQUENCY = 1;
 
-    public static void SolveMaze(String imagePath,
+    public static long SolveMaze(String imagePath,
                                  boolean drawState,
                                  boolean drawGif,
                                  String savePath,
                                  GeneratorRequest generatorRequest) throws IOException {
-
 
         List<MyPoint> player = new ArrayList<>();
         List<MyPoint> exit = new ArrayList<>();
@@ -119,13 +118,13 @@ public class ActualSolver {
         }
 
         long timerStop = System.currentTimeMillis();
-        System.out.println("Maze solved in: "  + (timerStop - timerStart) + "ms");
+        //System.out.println("Maze solved in: "  + (timerStop - timerStart) + "ms");
 
         if (drawGif) {
-            arrayForGif.add(ImageProcessor.deepCopy(image));
-            BufferedImage[] bufferedImages = new BufferedImage[arrayForGif.size()];
-            bufferedImages = arrayForGif.toArray(bufferedImages);
-            ImageProcessor.createGif(bufferedImages, (savePath + "Maze_Solving.gif"), 100, true);
+                arrayForGif.add(ImageProcessor.deepCopy(image));
+                BufferedImage[] bufferedImages = new BufferedImage[arrayForGif.size()];
+                bufferedImages = arrayForGif.toArray(bufferedImages);
+                ImageProcessor.createGif(bufferedImages, (savePath + "Maze_Solving.gif"), 200, true);
         }
 
         if (drawState) {
@@ -147,8 +146,16 @@ public class ActualSolver {
         image.setRGB(start.getX(), start.getY(), Color.RED.getRGB());
         image.setRGB(end.getX(), end.getY(), Color.MAGENTA.getRGB());
 
-        File outputfile = new File(savePath + "Maze_Solved.png");
-        ImageIO.write(image, "png", outputfile);
+        new Thread(() -> {
+            File outputfile = new File(savePath + "Maze_Solved.png");
+            try {
+                ImageIO.write(image, "png", outputfile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+
+        return  (timerStop - timerStart);
     }
 
     private static int heuristic(MyPoint point, MyPoint goal) {
