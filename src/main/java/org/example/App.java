@@ -1,8 +1,11 @@
 package org.example;
 
 
+import org.example.enums.GeneratorType;
 import org.example.enums.MazePaths;
+import org.example.enums.RandomType;
 import org.example.model.ActualSolver;
+import org.example.objects.GeneratorRequest;
 
 import java.io.IOException;
 
@@ -14,17 +17,17 @@ public class App {
                 true,
                 true,
                 MazePaths.SAVE_PATH.toString(),
-                null
+                new GeneratorRequest(
+                        200,
+                        200,
+                        GeneratorType.DEPTH_FIRST_SEARCH,
+                        RandomType.TRUE_RANDOM,
+                        true)
                 ));
         long stop = System.currentTimeMillis();
         System.out.println("All process : " + (stop - start));
 
-//        new GeneratorRequest(
-//                200,
-//                200,
-//                GeneratorType.DEPTH_FIRST_SEARCH,
-//                RandomType.TRUE_RANDOM,
-//                true)
+
     }
 }
 
